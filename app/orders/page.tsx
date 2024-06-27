@@ -8,7 +8,7 @@ export default function Page() {
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
-      <div className="w-2/3 mx-auto">
+      <div className="w-5/6 mx-auto">
         <Orderblock1 />
        <Component />
        </div>
