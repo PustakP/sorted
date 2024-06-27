@@ -27,8 +27,8 @@ In a world where online marketplaces are dominated by large corporations, we wan
 
 ## 📸 Screenshots
 
-![Hero Section](https://i.ibb.co/0ZGHb2R/image.png)
-*The beautiful hero section of Sorted.*
+![Product Page](https://i.ibb.co/0ZGHb2R/image.png)
+*The Product Page of Sorted.*
 
 ## 📄 Code Snippets
 
