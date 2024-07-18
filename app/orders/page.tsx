@@ -1,7 +1,7 @@
 import ProductPage from "@/components/productpage";
 import { Footer } from "@/components/footer";
 import Component from "@/components/bigorder2";
-import { Navbar } from "@/components/navbar";
+import { Navbar } from "@/components/navbar2";
 import Orderblock1 from "@/components/orderblock1";
 
 export default function Page() {
