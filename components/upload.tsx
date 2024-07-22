@@ -75,7 +75,7 @@ export default function ProductUploadForm() {
 
       console.log('Inserting product data into Supabase...');
       const { error } = await supabase
-        .from('products')
+        .from('images')
         .insert({
           id: nextId,
           name,
