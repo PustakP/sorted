@@ -1,26 +1,48 @@
 "use client"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { Navbar } from "@/components/navbar2"
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 interface Product {
   id: number
   name: string
   price: number
-  image: string
+  image_link: string
 }
 
-const products: Product[] = [
-  { id: 1, name: "Product 1", price: 99, image: "https://placehold.co/300x400" },
-  { id: 2, name: "Product 2", price: 129, image: "https://placehold.co/300x400/orange/white" },
-  { id: 3, name: "Product 3", price: 79, image: "https://placehold.co/300x400/black/yellow" },
-  { id: 4, name: "Product 4", price: 149, image: "https://placehold.co/300x400/green/white" },
-  { id: 5, name: "Product 5", price: 89, image: "https://placehold.co/300x400/blue/white" },
-  // Add more products as needed
-]
-
 export default function ProductGrid() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchProducts() {
+      const { data, error } = await supabase
+        .from('images')
+        .select('id, name, price, image_link')
+        .order('id', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching products:', error);
+      } else {
+        setProducts(data || []);
+      }
+      setLoading(false);
+    }
+
+    fetchProducts();
+  }, []);
+
+  if (loading) {
+    return <div>Loading products...</div>;
+  }
+
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
@@ -31,12 +53,12 @@ export default function ProductGrid() {
             <Link key={product.id} href={`/product/${product.id}`}>
               <div className="flex flex-col bg-muted rounded-sm hover:bg-accent border-2 hover:border-4 cursor-pointer">
                 <img
-                  src={product.image}
+                  src={product.image_link}
                   alt={product.name}
                   className="aspect-square object-cover rounded-lg w-full mb-2 p-2"
                 />
                 <h2 className="text-lg font-semibold px-2">{product.name}</h2>
-                <p className="text-muted-foreground mb-2 px-2">${product.price}</p>
+                <p className="text-muted-foreground mb-2 px-2">INR {product.price} /-</p>
               </div>
             </Link>
           ))}
