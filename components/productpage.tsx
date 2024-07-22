@@ -128,7 +128,7 @@ export default function ProductPage() {
               <h2 className="text-xl font-semibold">Product Details</h2>
               <p className="text-muted-foreground">
                 {/* Add product description if available in your database */}
-                This is a placeholder for the product description. You may want to add a 'description' field to your database and display it here.
+                This is a placeholder for the product description. 
               </p>
             </div>
             <div className="bg-muted p-6 rounded-lg">
