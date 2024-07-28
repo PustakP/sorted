@@ -9,7 +9,7 @@ export default function uploadpage() {
         <>
         <Navbar />
         <div className="flex justify-center items-center">
-          <div className="w-11/12 md:w-4/5">
+          <div className="w-9/12 md:w-4/5">
             <ProductUploadForm />
           </div>
         </div>

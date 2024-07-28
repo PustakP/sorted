@@ -17,6 +17,47 @@ export function Navbar() {
     }
   }
 
+  const navItems = [
+    { href: '/', label: 'Home' },
+    { href: '/products', label: 'Products' },
+    { href: '/orders', label: 'Sales' },
+    // Add items, only visible when logged in
+    ...(session ? [{ href: '/list', label: 'List' }] : []),
+  ]
+
+  const authButton = {
+    label: session ? `Hi, ${session.user?.name}` : 'Log In',
+    action: handleAuth,
+  }
+
+  const renderNavItems = (isMobile: boolean) => (
+    <>
+      {navItems.map((item) => (
+        <Link
+          key={item.href}
+          href={item.href}
+          className={`${
+            isMobile
+              ? 'flex items-center gap-2 px-2 py-1 rounded-md hover:bg-muted/50'
+              : 'hidden md:block'
+          }`}
+        >
+          {item.label}
+        </Link>
+      ))}
+      <Button
+        onClick={authButton.action}
+        className={`${
+          isMobile
+            ? 'flex items-center gap-2 px-2 py-1 border-2 rounded-md hover:bg-accent bg-muted text-foreground'
+            : 'hidden md:block border-2 rounded-md px-2 py-1 hover:bg-muted bg-accent text-foreground'
+        }`}
+      >
+        {authButton.label}
+      </Button>
+    </>
+  )
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 mb-12">
       <div className="container flex h-14 items-center">
@@ -29,14 +70,11 @@ export function Navbar() {
           </SheetTrigger>
           <SheetContent side="left" className="w-[300px] sm:w-[400px]">
             <nav className="flex flex-col space-y-4">
-            <Link href="/" className="flex items-center gap-2">
-          <Package2 className="h-6 w-6" /> 
-          <span className="font-bold">Sorted</span>
-        </Link>
-              <Link href="/" className="flex items-center gap-2 px-2 py-1 rounded-md hover:bg-muted/50">Home</Link>
-              <Link href="/products" className="flex items-center gap-2 px-2 py-1 rounded-md hover:bg-muted/50">Products</Link>
-              <Link href="/orders" className="flex items-center gap-2 px-2 py-1 rounded-md hover:bg-muted/50">Sales</Link>
-              <Button onClick={handleAuth} className="flex items-center gap-2 px-2 py-1 border-2 rounded-md hover:bg-accent bg-muted text-foreground">{session ? `Hi, ${session.user?.name}` : 'Log In'}</Button>
+              <Link href="/" className="flex items-center gap-2">
+                <Package2 className="h-6 w-6" /> 
+                <span className="font-bold">Sorted</span>
+              </Link>
+              {renderNavItems(true)}
             </nav>
           </SheetContent>
         </Sheet>
@@ -45,12 +83,7 @@ export function Navbar() {
           <span className="font-bold">Sorted</span>
         </Link>
         <nav className="ml-auto flex items-center space-x-4">
-          <Link href="/" className="hidden md:block">Home</Link>
-          <Link href="/products" className="hidden md:block">Products</Link>
-          <Link href="/orders" className="hidden md:block">Sales</Link>
-          <Button onClick={handleAuth} className="hidden md:block border-2 rounded-md px-2 py-1 hover:bg-muted bg-accent text-foreground">
-            {session ? `Hi, ${session.user?.name}` : 'Log In'}
-          </Button>
+          {renderNavItems(false)}
         </nav>
       </div>
     </header>

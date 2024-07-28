@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import imageCompression from 'browser-image-compression';
+import Image from 'next/image';
 
 const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -23,12 +25,32 @@ export default function ProductUploadForm() {
   const [imageLink3, setImageLink3] = useState('');
   const [isUploaded, setIsUploaded] = useState(false);
   const [lastId, setLastId] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+  const [progressText, setProgressText] = useState('');
+
+  const compressImage = async (file: File) => {
+    const options = {
+      maxSizeMB: 1,
+      maxWidthOrHeight: 1920,
+      useWebWorker: true
+    };
+    
+    try {
+      const compressedFile = await imageCompression(file, options);
+      return compressedFile;
+    } catch (error) {
+      console.error("Error compressing image:", error);
+      return file;
+    }
+  };
 
   const uploadImage = async (file: File) => {
-    console.log(`Uploading image: ${file.name}`);
+    console.log(`Compressing and uploading image: ${file.name}`);
+    const compressedFile = await compressImage(file);
+    
     const formData = new FormData();
     formData.append('key', '0a0e1aa641bdc532b0a53640ea1e0583');
-    formData.append('image', file);
+    formData.append('image', compressedFile);
 
     const response = await fetch('https://api.imgbb.com/1/upload', {
       method: 'POST',
@@ -58,22 +80,28 @@ export default function ProductUploadForm() {
     e.preventDefault();
     if (!image) return;
 
+    setIsLoading(true);
+    setProgressText('Starting upload process...');
+
     try {
-      console.log('Starting product upload process...');
+      setProgressText('Compressing and uploading main image...');
       const imageUrl = await uploadImage(image);
       let imageUrl2 = '';
       let imageUrl3 = '';
 
       if (image2) {
+        setProgressText('Compressing and uploading additional image 1...');
         imageUrl2 = await uploadImage(image2);
       }
       if (image3) {
+        setProgressText('Compressing and uploading additional image 2...');
         imageUrl3 = await uploadImage(image3);
       }
     
+      setProgressText('Preparing to insert data into database...');
       const nextId = await getNextId();
 
-      console.log('Inserting product data into Supabase...');
+      setProgressText('Inserting product data into database...');
       const { error } = await supabase
         .from('images')
         .insert({
@@ -91,6 +119,7 @@ export default function ProductUploadForm() {
         console.error('Supabase error:', error);
         throw error;
         }
+      setProgressText('Product uploaded successfully!');
 
       console.log('Product uploaded successfully!');
       setImageLink(imageUrl);
@@ -104,8 +133,12 @@ export default function ProductUploadForm() {
       setIsUploaded(true);
     } catch (error) {
       console.error('Error uploading product:', error);
+      setProgressText('Error occurred during upload.');
+    } finally {
+      setIsLoading(false);
     }
   };
+
 
   return (
     <div className="relative">
@@ -155,8 +188,8 @@ export default function ProductUploadForm() {
             onChange={(e) => setImage3(e.target.files?.[0] || null)}
           />
         </div>
-        <Button type="submit">
-          Upload Product
+        <Button className="text-white" type="submit" disabled={isLoading}>
+          {isLoading ? 'Uploading...' : 'Upload Product'}
         </Button>
         {imageLink && (
           <div className="mt-4">
@@ -167,7 +200,16 @@ export default function ProductUploadForm() {
           </div>
         )}
       </form>
-      {isUploaded && (
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white bg-opacity-90 rounded-lg p-6 flex flex-col items-center">
+            <Image src="/loading.gif" alt="Loading" width={100} height={100} />
+            <p className="mt-4 text-black">{progressText}</p>
+          </div>
+        </div>
+      )}
+
+      {isUploaded && !isLoading && (
         <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <h2 className="text-6xl text-white font-bold">Product Uploaded!</h2>
         </div>
